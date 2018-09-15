@@ -10,46 +10,67 @@ public class Missile : MonoBehaviour {
     static int INIT_SPEED = 20;
 
     Vector3 dir;
-    string origin; // alien or cannon
+    GameObject origin; // alien or cannon
     int power;
     int speed;
+    bool isAlive = true;
 
-	// Use this for initialization
-	void Start () {
+    public Material DeadMaterial;
+
+
+    // Use this for initialization
+    void Start () {
 
 		
 	}
 	
 	// Update is called once per frame
 	void Update () {
-        if (this.dir != null) {
+        if (this.dir != null && this.isAlive) {
             this.Move(this.dir, this.speed, Time.deltaTime);
         }
-
-
-
     }
 
     void Move (Vector3 dir, int speed, float deltaT) {
-        transform.Translate(dir * speed * deltaT);
+        transform.Translate(dir * speed * deltaT, Space.World);
     }
 
-    private void OnTriggerEnter(Collider other) {
-        switch (this.origin) {
+    private void OnCollisionEnter(Collision collision) {
+        if (collision.collider.name == "FrontWall") {
+            this.isAlive = false;
+        }
+
+        if (collision.collider.name == "BottomWall") {
+            Destroy(this.gameObject);
+        }
+
+        switch (this.origin.tag) {
             case "alien":
-                if (other.tag == "alien" || other.tag == "aliensGroup" || other.gameObject.name == "DeadLine") {
+                if (collision.collider.tag == "alien" ||
+                    collision.collider.tag == "aliensGroup" ||
+                    collision.collider.name == "DeadLine") {
                     return;
                 } else {
-                    Destroy(this.gameObject);
+                    Alien alien = this.origin.GetComponent<Alien>();
+                    alien.DeductFlyingMissiles();
+                    this.Die();
                 }
 
                 break;
 
             case "cannon":
-                if (other.tag == "cannon" || other.tag == "aliensGroup" || other.name == "DeadLine") {
+                if (collision.collider.tag == "cannon" ||
+                    collision.collider.tag == "cannonBrick" ||
+                    collision.collider.tag == "aliensGroup" ||
+                    collision.collider.name == "DeadLine") {
                     return;
+                } else if (collision.collider.name == "BackWall") {
+                    this.dir.y = this.dir.y * (-1);
                 } else {
-                    Destroy(this.gameObject);
+                    Cannon cannon = this.origin.GetComponent<Cannon>();
+                    cannon.ClearFlyingMissile();
+                    this.Die();
+
                 }
 
                 break;
@@ -57,7 +78,21 @@ public class Missile : MonoBehaviour {
         }
     }
 
-    public void ConfigMissile(Vector3 dir, string origin, string type) {
+    void Die() {
+        this.GetComponent<Rigidbody>().useGravity = true;
+
+        Rigidbody rb = this.GetComponent<Rigidbody>();
+        rb.constraints = RigidbodyConstraints.None;
+        rb.constraints = RigidbodyConstraints.FreezePositionZ;
+
+        // change material
+        this.GetComponent<MeshRenderer>().material = DeadMaterial;
+
+
+    }
+
+
+    public void ConfigMissile(Vector3 dir, GameObject origin, string type) {
         this.dir = dir;
         this.origin = origin;
         this.speed = Missile.INIT_SPEED;
@@ -76,8 +111,18 @@ public class Missile : MonoBehaviour {
         this.speed = speed;
     }
 
+    public void SetAlive(bool isAlive) {
+        this.isAlive = isAlive;
+    }
+
+
     // getter
     public string GetOrigin() {
-        return this.origin;
+        return this.origin.tag;
     }
+
+    public bool IsAlive() {
+        return this.isAlive;
+    }
+
 }

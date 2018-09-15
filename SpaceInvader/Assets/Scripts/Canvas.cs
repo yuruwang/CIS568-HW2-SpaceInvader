@@ -8,10 +8,13 @@ public class Canvas : MonoBehaviour {
     public GameObject scoreText;
     public GameObject livesText;
     public GameObject gameOverText;
-    public GameObject SpaceShipScoreText;
+    public GameObject ReminderText;
     public GameObject levelText;
+    public GameObject warningText;
 
-    bool showSpaceShipScore = false;
+    bool showReminder = false;
+    bool showWarning = false;
+    float showWarningDuration = 0;
     // Use this for initialization
     void Start() {
 
@@ -19,8 +22,12 @@ public class Canvas : MonoBehaviour {
 
     // Update is called once per frame
     void Update() {
-        if (this.showSpaceShipScore) {
-            StartCoroutine(this.ShowSpaceShipScore());
+        if (this.showReminder) {
+            StartCoroutine(this.ShowReminder());
+        }
+
+        if (this.showWarning) {
+            StartCoroutine(this.ShowWarning(this.showWarningDuration));
         }
     }
 
@@ -36,21 +43,42 @@ public class Canvas : MonoBehaviour {
         this.levelText.GetComponent<Text>().text = "Level: " + level;
     }
 
-    public IEnumerator ShowSpaceShipScore() {
-        this.SpaceShipScoreText.GetComponent<Text>().enabled = true;
+
+    public void SetReminderText(string text) {
+        this.ReminderText.GetComponent<Text>().text = text;
+        this.showReminder = true;
+    }
+
+    public IEnumerator ShowReminder() {
+        this.ReminderText.GetComponent<Text>().enabled = true;
         yield return new WaitForSeconds(2);
-        this.showSpaceShipScore = false;
-        this.SpaceShipScoreText.GetComponent<Text>().enabled = false;
+        this.showReminder = false;
+        this.ReminderText.GetComponent<Text>().enabled = false;
 
     }
 
-    public void SetSpaceShipScore(int score) {
-        this.SpaceShipScoreText.GetComponent<Text>().text = "+" + score;
-        this.showSpaceShipScore = true;
+    public IEnumerator ShowWarning(float duration) {
+        this.warningText.GetComponent<Text>().enabled = true;
+        yield return new WaitForSeconds(duration);
+        this.warningText.GetComponent<Text>().enabled = false;
+        this.showWarning = false;
+        this.showWarningDuration = 0;
+
     }
+
+    public void InvokeWarning(float duration) {
+        this.showWarning = true;
+        this.showWarningDuration = duration;
+    }
+
+
 
     public void showLose(bool show) {
+        if (this.showWarning) {
+            this.showWarning = false;
+        }
         this.gameOverText.gameObject.SetActive(show);
-
     }
+
+
 }

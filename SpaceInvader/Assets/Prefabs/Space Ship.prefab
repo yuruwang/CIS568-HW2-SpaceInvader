@@ -21,10 +21,10 @@ GameObject:
   - component: {fileID: 4400429988855078}
   - component: {fileID: 33874529398939552}
   - component: {fileID: 23858711630312298}
-  - component: {fileID: 135185624295230754}
   - component: {fileID: 114241233020109620}
   - component: {fileID: 54518626973858370}
   - component: {fileID: 82189132619976054}
+  - component: {fileID: 65278353342125114}
   m_Layer: 0
   m_Name: Space Ship
   m_TagString: Untagged
@@ -40,7 +40,7 @@ Transform:
   m_GameObject: {fileID: 1012611833116996}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 18.57, y: 0, z: 26.8}
-  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_LocalScale: {x: 3, y: 3, z: 3}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -51,7 +51,7 @@ MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1012611833116996}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -86,7 +86,7 @@ MeshFilter:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1012611833116996}
-  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!54 &54518626973858370
 Rigidbody:
   m_ObjectHideFlags: 1
@@ -100,8 +100,20 @@ Rigidbody:
   m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 12
   m_CollisionDetection: 0
+--- !u!65 &65278353342125114
+BoxCollider:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1012611833116996}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!82 &82189132619976054
 AudioSource:
   m_ObjectHideFlags: 1
@@ -208,15 +220,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87b2d091b08625d42bf637258e382d96, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!135 &135185624295230754
-SphereCollider:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1012611833116996}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}
+  SpaceShipBrickPrefab: {fileID: 1057244082754532, guid: abc07d24520442946831a3fe6861073e,
+    type: 2}
+  HeartMaterial: {fileID: 2100000, guid: e48cc90ef5148a14cbcf8f0fbc071269, type: 2}

@@ -10,6 +10,9 @@ TagManager:
   - wall
   - aliensGroup
   - brick
+  - rightWall
+  - moveBound
+  - cannonBrick
   layers:
   - Default
   - TransparentFX

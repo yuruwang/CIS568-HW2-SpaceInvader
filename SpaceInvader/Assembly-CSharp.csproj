@@ -64,12 +64,14 @@
     <Compile Include="Assets\Scripts\Alien.cs" />
     <Compile Include="Assets\Scripts\Aliens.cs" />
     <Compile Include="Assets\Scripts\Bick.cs" />
+    <Compile Include="Assets\Scripts\CameraShaker.cs" />
     <Compile Include="Assets\Scripts\Cannon.cs" />
     <Compile Include="Assets\Scripts\Canvas.cs" />
     <Compile Include="Assets\Scripts\GameManager.cs" />
     <Compile Include="Assets\Scripts\Missile.cs" />
     <Compile Include="Assets\Scripts\PlayerCamera.cs" />
     <Compile Include="Assets\Scripts\SpaceShip.cs" />
+    <Compile Include="Assets\Scripts\SpaceShipBrick.cs" />
     <Compile Include="Assets\Scripts\SwitchScene.cs" />
     <Reference Include="UnityEditor.StandardEvents">
       <HintPath>E:/CGGT/CIS568/hw_2/PartC/unity_project/CIS568-HW2-SpaceInvader/SpaceInvader/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>

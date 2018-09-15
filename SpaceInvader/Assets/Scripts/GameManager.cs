@@ -7,15 +7,18 @@ using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour {
     public static GameManager instance;
     static float initFiringProb = 0.0005f;
+    //static float initFiringProb = 0.01f;
+
     static float initStraightMissileProb = 0.9f;
     static float initWiggyMissileProb = 0.1f;
     static int initAliensSpeed = 1;
     static int totalLevels = 1;
     static int totalLives = 3;
+    static float powerFiringDuration = 5.0f;
 
-    static Vector3 spaceShipStartPos = new Vector3(18.7f, 0, 26.8f);
-    static Vector3 aliensGroupStartPos = new Vector3(-10, 0, 11);
-    static Vector3 aliensAdventStep = new Vector3(0, 0, -1);
+    static Vector3 spaceShipStartPos = new Vector3(18.7f, 25.0f, 0);
+    static Vector3 aliensGroupStartPos = new Vector3(-16, 11, 0);
+    static Vector3 aliensAdventStep = new Vector3(0, -1, 0);
     static int rows = 5;
     static int cols = 11;
 
@@ -30,6 +33,7 @@ public class GameManager : MonoBehaviour {
     int scores = 0;
     int currLevel = 1;  // current game level
     float nextSpaceShipTime;
+    float nextPowerFiringTime;
 
     float firingProb;
     float straightMissileProb;
@@ -80,6 +84,17 @@ public class GameManager : MonoBehaviour {
             this.ShootSpaceShip();
         }
 
+        if (Time.time > this.nextPowerFiringTime) {
+            StartCoroutine(this.StartPowerFiring(GameManager.powerFiringDuration));
+
+            Canvas canvas = this.canvas.GetComponent<Canvas>();
+            canvas.InvokeWarning(GameManager.powerFiringDuration);
+
+            System.Random rnd = new System.Random();
+            int deltaT = rnd.Next(30, 35);
+            this.nextPowerFiringTime = deltaT + Time.time;
+        }
+
         this.KeyboardEvents();
 
 
@@ -126,6 +141,10 @@ public class GameManager : MonoBehaviour {
         this.InitAliens();
         this.currCameraIdx = 0;
 
+        System.Random rnd = new System.Random();
+        int rndNum = rnd.Next(30, 60);
+        this.nextPowerFiringTime = rndNum;
+
 
         this.canvas.GetComponent<Canvas>().UpdateScores(this.scores);
         this.canvas.GetComponent<Canvas>().UpdateLives(this.livesRemaining);
@@ -139,13 +158,13 @@ public class GameManager : MonoBehaviour {
         Vector3 center = this.aliensGroup.transform.position;
         center += new Vector3(1, 0, 0);
         Quaternion orientation = this.aliensGroup.transform.rotation;
-        float offsetX = 1.8f;
-        float offsetZ = 1.8f;
+        float offsetX = 2.5f;
+        float offsetY = 1.8f;
 
         this.aliens = new GameObject[GameManager.rows, GameManager.cols];
         for (int i = 0; i < 2; i++) {
             for (int j = 0; j < cols; j++) {
-                GameObject alienObj = Instantiate(smallAllienPrefab, center + new Vector3(offsetX * j, 0, offsetZ * i), orientation);
+                GameObject alienObj = Instantiate(smallAllienPrefab, center + new Vector3(j * offsetX, i * offsetY, 0), orientation);
                 this.aliens[i, j] = alienObj;
                 alienObj.transform.parent = aliensGroup.transform;
 
@@ -161,7 +180,7 @@ public class GameManager : MonoBehaviour {
 
         for (int i = 2; i < 4; i++) {
             for (int j = 0; j < cols; j++) {
-                GameObject alienObj = Instantiate(mediumAllienPrefab, center + new Vector3(offsetX * j, 0, offsetZ * i), orientation);
+                GameObject alienObj = Instantiate(mediumAllienPrefab, center + new Vector3(j * offsetX, i * offsetY, 0), orientation);
                 this.aliens[i, j] = alienObj;
                 alienObj.transform.parent = aliensGroup.transform;
 
@@ -173,7 +192,7 @@ public class GameManager : MonoBehaviour {
 
         for (int i = 4; i < 5; i++) {
             for (int j = 0; j < cols; j++) {
-                GameObject alienObj = Instantiate(largeAllienPrefab, center + new Vector3(offsetX * j, 0, offsetZ * i), orientation);
+                GameObject alienObj = Instantiate(largeAllienPrefab, center + new Vector3(j * offsetX, i * offsetY, 0), orientation);
                 this.aliens[i, j] = alienObj;
                 alienObj.transform.parent = aliensGroup.transform;
 
@@ -192,6 +211,13 @@ public class GameManager : MonoBehaviour {
 
             }
         }
+    }
+
+    IEnumerator StartPowerFiring(float duration) {
+        this.firingProb = 0.01f;
+        yield return new WaitForSeconds(duration);
+        this.firingProb = GameManager.initFiringProb;
+
     }
 
     public void AddDifficulty() {
@@ -243,6 +269,15 @@ public class GameManager : MonoBehaviour {
         if (this.livesRemaining == 0) {
             this.Lose();
         }
+
+        // camera shaking
+        CameraShaker shaker = this.cameras[this.currCameraIdx].GetComponent<CameraShaker>();
+        shaker.ShouldShake(true);
+    }
+
+    public void AddLives(int lives) {
+        this.livesRemaining += lives;
+        this.canvas.GetComponent<Canvas>().UpdateLives(this.livesRemaining);
     }
 
     public void GoToNextLevel() {
@@ -271,6 +306,11 @@ public class GameManager : MonoBehaviour {
         this.canvas.GetComponent<Canvas>().showLose(true);
         yield return new WaitForSeconds(3);
         SceneManager.LoadScene(0);
+    }
+
+    public void ShowReminder(string text) {
+        Canvas canvas = this.canvas.GetComponent<Canvas>();
+        canvas.SetReminderText(text);
     }
 
 

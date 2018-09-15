@@ -3,16 +3,22 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Alien : MonoBehaviour {
+    static float restOriSpeed = 50.0f;
+    static int maxFlyingMissiles = 3;
+    static Vector3 fireDir = new Vector3(0, -1, 0);
+
     int score;
     string type;
     Vector3Int idx;
+    bool died = false;
 
-    List<GameObject> flyingMissiles = new List<GameObject>();
+    int flyingMissileCount = 0;
     bool isStriker = false;
 
     GameManager gm;
     public GameObject StraightMissilePrefab;
     public GameObject WiggyMissilePrefab;
+    public Material DeadMaterial;
 
 
     // Use this for initialization
@@ -22,7 +28,7 @@ public class Alien : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if (this.isStriker) {
+        if (this.isStriker && !this.died) {
             float randomNum = Random.Range(0.0f, 1.0f);
             if (randomNum < gm.GetFiringProb()) {
                 this.Fire();
@@ -30,20 +36,40 @@ public class Alien : MonoBehaviour {
         }
     }
 
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.tag == "missile") {
-            GameObject missileObj = other.gameObject;
+    private void OnCollisionEnter(Collision collision) {
+        if (this.died) {
+            if (collision.collider.name == "BottomWall") {
+                Destroy(this.gameObject);
+            }
+            return;
+        }
+        if (collision.collider.tag == "missile") {
+            GameObject missileObj = collision.collider.gameObject;
             Missile missile = missileObj.GetComponent<Missile>();
-            if (missile.GetOrigin() == "alien") {
+            if (missile.GetOrigin() == "alien" || !missile.IsAlive()) {
                 return;
             }
             this.Die();
+            missile.SetAlive(false);
 
-        } else if (other.name == "DeadLine") {
+        }
+
+        if (collision.collider.name == "DeadLine") {
             gm.Lose();
             this.gameObject.SetActive(false);
+
         }
+
+        this.ResetOrientation();
+
+
+    }
+
+    public  void ResetOrientation() {
+        //Quaternion origOrientation = this.transform.parent.rotation;
+        //Rigidbody rb = this.GetComponent<Rigidbody>();
+        //print("original orientation: " + origOrientation);
+        //rb.MoveRotation(origOrientation);
     }
 
     public void ConfigAlien(string type, int score, Vector3Int idx) {
@@ -52,44 +78,45 @@ public class Alien : MonoBehaviour {
         this.idx = idx;
     }
 
-    void Die () {
+    void Die() {
+        this.died = true;
         AudioClip clip = this.GetComponent<AudioSource>().clip;
         AudioSource.PlayClipAtPoint(clip, this.transform.position);
         gm.KillAlien(this.idx);
-        Destroy(this.gameObject);
+        //Destroy(this.gameObject);
+        this.transform.parent = null;
+        this.GetComponent<Rigidbody>().useGravity = true;
+
+        // change color
+        //Renderer rend = this.GetComponent<Renderer>();
+        //rend.material.shader = Shader.Find("_Color");
+        //rend.material.SetColor("_Color", Color.green);
+        this.GetComponent<MeshRenderer>().material = DeadMaterial;
+
+        Rigidbody rb = this.GetComponent<Rigidbody>();
+        rb.constraints = RigidbodyConstraints.None;
+        rb.constraints = RigidbodyConstraints.FreezePositionZ;
     }
 
     void Fire() {
-        bool firable = false;
-        if (this.flyingMissiles.Count > 0) {
-            for (int i = 0; i < this.flyingMissiles.Count; i++) {
-                if (this.flyingMissiles[i] == null) {
-                    firable = true;
-                    this.flyingMissiles.RemoveAt(i);
-                }
-            }
-        } else {
-            firable = true;
-        }
-        if (!firable) {
+        if (this.flyingMissileCount >= Alien.maxFlyingMissiles) {
             return;
         }
 
         // determine type of missile
+        Vector3 offset = new Vector3(0, -0.5f, 0);
         float randomNum = Random.Range(0.0f, 1.0f);
         if (randomNum < gm.GetStraightMissileProb()) {
-            GameObject missileObj = Instantiate(StraightMissilePrefab, transform.position, transform.rotation);
+            GameObject missileObj = Instantiate(StraightMissilePrefab, transform.position + offset, transform.rotation);
             Missile missile = missileObj.GetComponent<Missile>();
-            missile.ConfigMissile(new Vector3(0, 0, -1), "alien", "straight");
-            this.flyingMissiles.Add(missileObj);
-
+            missile.ConfigMissile(new Vector3(0, -1, 0), this.gameObject, "straight");
         } else {
-            GameObject missileObj = Instantiate(WiggyMissilePrefab, transform.position, transform.rotation);
+            GameObject missileObj = Instantiate(WiggyMissilePrefab, transform.position + offset, transform.rotation);
             Missile missile = missileObj.GetComponent<Missile>();
-            missile.ConfigMissile(new Vector3(0, 0, -1), "alien", "wiggy");
-            this.flyingMissiles.Add(missileObj);
-
+            missile.ConfigMissile(new Vector3(0, -1, 0), this.gameObject, "wiggy");
         }
+        this.flyingMissileCount++;
+
 
     }
     // getters
@@ -100,6 +127,13 @@ public class Alien : MonoBehaviour {
     // setters
     public void SetStriker(bool isStriker) {
         this.isStriker = isStriker;
+    }
+
+    public void DeductFlyingMissiles() {
+        this.flyingMissileCount--;
+        if (this.flyingMissileCount < 0) {
+            this.flyingMissileCount = 0;
+        }
     }
         
 }
